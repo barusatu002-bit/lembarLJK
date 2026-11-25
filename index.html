@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Koreksi Lembar Jawab</title>
 <meta name="theme-color" content="#E6EDF3" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0B1620" media="(prefers-color-scheme: dark)">
-<meta name="build" content="20261124-224201"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
+<meta name="build" content="20261125-143956"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Koreksi LJK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
@@ -86,7 +86,7 @@ nav em{position:absolute;top:2px;right:2px;background:var(--bad);color:#fff;bord
 </style></head><body>
 <header class="top"><button class="ib" id="logo" aria-label="Buka sampul" style="background:none;width:44px;height:44px"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#6EC1F0"/><path d="M11 15h11c2 0 2 1 2 2v16c0-1-1-2-2-2H11zM37 15H26c-2 0-2 1-2 2v16c0-1 1-2 2-2h11z" fill="#0E2A3B"/><path d="M17 24l3 3 6-7" stroke="#6EC1F0" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button><b>Koreksi Lembar Jawab</b><button class="ib" id="theme" aria-label="Ganti tema"></button></header>
 <main id="app"></main>
-<div id="sampul" role="dialog" aria-label="Sampul"><div><div class="slogo"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#6EC1F0"/><path d="M11 15h11c2 0 2 1 2 2v16c0-1-1-2-2-2H11zM37 15H26c-2 0-2 1-2 2v16c0-1 1-2 2-2h11z" fill="#0E2A3B"/><path d="M17 24l3 3 6-7" stroke="#6EC1F0" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h1>Koreksi Lembar Jawab</h1><p>Oleh Aras Hidayat, S.Pd</p><small>SMA Negeri 3 Paloh</small><button class="btn b" id="mulai">Mulai Mengoreksi</button></div></div>
+<div id="sampul" role="dialog" aria-label="Sampul"><div><div class="slogo"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#6EC1F0"/><path d="M11 15h11c2 0 2 1 2 2v16c0-1-1-2-2-2H11zM37 15H26c-2 0-2 1-2 2v16c0-1 1-2 2-2h11z" fill="#0E2A3B"/><path d="M17 24l3 3 6-7" stroke="#6EC1F0" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h1>Koreksi Lembar Jawab</h1><p>Oleh Nashirul Anam, S.Pd</p><small>SMPIT Logaritma Karanganyar</small><button class="btn b" id="mulai">Mulai Mengoreksi</button></div></div>
 <div id="toast"></div>
 <div id="cam"><video id="vid" playsinline muted></video><div class="guide"></div><div id="camst"></div><button id="shut" aria-label="Ambil foto"></button><button id="camx">Tutup</button></div>
 <input type="file" id="gal" accept="image/*" hidden>
@@ -284,7 +284,7 @@ function nav(){const a=active(),n=a?S.students.filter(s=>s.examId===a.id).length
  $('nav').innerHTML=Object.keys(NAMA).map(k=>`<a href="#${k}" aria-label="${NAMA[k]}" class="${page===k?'on':''}"><svg viewBox="0 0 24 24">${IC[k]}</svg><span>${NAMA[k]}</span>${k==='hasil'&&n?`<em>${n}</em>`:''}</a>`).join('')}
 function go(p){page=p;if(location.hash!=='#'+p)history.replaceState(null,'','#'+p);render()}
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(NAMA[h]&&h!==page){page=h;render()}});
-const credit='<p class="credit">Aplikasi oleh Aras Hidayat, S.Pd · SMA Negeri 3 Paloh</p>';
+const credit='<p class="credit">Aplikasi oleh Nashirul Anam, S.Pd · SMPIT Logaritma Karanganyar</p>';
 function render(){nav();const m=$('#app');
  ({pengaturan:rSet,pindai:rScan,hasil:rHasil,riwayat:rRiw})[page](m);m.insertAdjacentHTML('beforeend',credit);
  document.querySelectorAll('.fab').forEach(x=>x.remove());if(page==='pindai')fab()}
