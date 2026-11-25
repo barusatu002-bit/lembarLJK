@@ -1,7 +1,7 @@
 # Koreksi Lembar Jawab
 
 Aplikasi web (PWA) untuk mengoreksi lembar jawab pilihan ganda dari foto HP. Semua pemrosesan terjadi di HP; foto tidak dikirim ke mana pun.
-Dibuat oleh Aras Hidayat, S.Pd · SMA Negeri 3 Paloh.
+Dibuat oleh Nashirul Anam, S.Pd · SMPIT Logaritma Karanganyar.
 
 ## Isi paket
 `index.html` · `sw.js` · `manifest.webmanifest` · `icons/` · `lembar/` (PDF A4 dan F4) · `README.md`
