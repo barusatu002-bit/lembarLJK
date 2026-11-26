@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Koreksi Lembar Jawab</title>
 <meta name="theme-color" content="#E6EDF3" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0B1620" media="(prefers-color-scheme: dark)">
-<meta name="build" content="20261125-143935"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
+<meta name="build" content="20261126-150500"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Koreksi LJK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
@@ -309,7 +309,7 @@ function rSet(m){
   <div class="tile"><label for="pt">Tempel kunci (contoh: ABCDE… atau 1.A 2.B)</label><textarea id="pt" rows="2"></textarea>
   <div class="row" style="margin-top:10px"><button class="btn s" id="ptb">Terapkan teks</button><button class="btn s" id="ksc">Pindai lembar kunci</button><button class="btn s" id="kcl">Kosongkan</button></div></div>
   <div class="row"><button class="btn b" id="knext">Simpan &amp; Lanjut</button></div>`}
- if(tab==='lembar')h+=`<div class="tile y"><h2>Lembar jawab</h2><p class="lbl" style="margin:0 0 6px">Versi ${document.querySelector('meta[name=build]').content}</p><p>Satu kertas dipotong menjadi 3 lembar. Tiap lembar memuat 50 soal (A–E) dan 4 kotak hitam di sudut. Hitamkan satu bulatan penuh dengan pensil 2B.</p><div class="row"><a class="btn" href="lembar/lembar-jawab-A4.pdf" download style="text-align:center;text-decoration:none">Unduh A4</a><a class="btn" href="lembar/lembar-jawab-F4.pdf" download style="text-align:center;text-decoration:none">Unduh F4</a></div></div>`;
+ if(tab==='lembar')h+=`<div class="tile y"><h2>Lembar jawab</h2><p class="lbl" style="margin:0 0 6px">Versi ${document.querySelector('meta[name=build]').content}</p><p>Setiap lembar memuat 50 soal (A–E) dan 4 kotak hitam di sudut serta 5 nomor uraian. Hitamkan satu bulatan penuh dengan pensil 2B.</p><div class="row"><a class="btn" href="lembar/lembar-jawab-A4.pdf" download style="text-align:center;text-decoration:none">Unduh A4</a><a class="btn" href="lembar/lembar-jawab-F4.pdf" download style="text-align:center;text-decoration:none">Unduh F4</a></div></div>`;
  m.innerHTML=h;
  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{rd();tab=b.dataset.t;render()});
  const rd=()=>{if(tab!=='jenis')return;E.jenis=$('#jn').value;E.mapel=$('#mp').value.trim();E.kelas=$('#kl').value.trim();E.n=+$('#nn').value};
