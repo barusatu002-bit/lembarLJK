@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Koreksi Lembar Jawab</title>
 <meta name="theme-color" content="#E6EDF3" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0B1620" media="(prefers-color-scheme: dark)">
-<meta name="build" content="20261126-190000"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
+<meta name="build" content="20261127-100000"><meta name="description" content="Koreksi lembar jawab pilihan ganda otomatis dari foto HP.">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Koreksi LJK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
@@ -96,7 +96,8 @@ nav em{position:absolute;top:2px;right:2px;background:var(--bad);color:#fff;bord
 (function (root) {
   const GEO = { W: 470, H: 1000, sq: 30, corners: [[35, 35], [435, 35], [35, 965], [435, 965]],
     bx: [85, 295], by: 140, dx: 34, dy: 32, rows: 25, r: 11, inner: 7 };
-  const VERIFY_MIN = 0.08;   // kontras lingkaran cetak minimum agar lembar diterima (toleran foto buram)
+  const VERIFY_MIN = 0.08;
+  const KS = 4, KC = 2.0;   // pengali derau & batas keyakinan   // kontras lingkaran cetak minimum agar lembar diterima (toleran foto buram)
 
   function toGray(rgba, w, h) {
     const g = new Uint8Array(w * h);
@@ -239,13 +240,42 @@ nav em{position:absolute;top:2px;right:2px;background:var(--bad);color:#fff;bord
   // Ambang adaptif: pensil tipis/foto buram menghasilkan "fill" lebih kecil, jadi ambang menyesuaikan sheet itu sendiri.
   function median(a) { const s = a.slice().sort((p, q) => p - q); return s[s.length >> 1]; }
 
+  // Geser kisi per baris: kertas melengkung/lensa membuat bulatan sedikit bergeser dari kisi dasar.
+  // Cincin cetak dari kelima bulatan satu baris dipakai untuk mencari pergeseran terbaik (±5 satuan).
+  function rowOffsets(can, geo) {
+    const R = 5, out = [];
+    for (let q = 0; q < geo.rows * 2; q++) {
+      const col = (q / geo.rows) | 0, cy = geo.by + (q % geo.rows) * geo.dy;
+      let best = -1e9, bx = 0, by = 0;
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+        let sc = 0;
+        for (let k = 0; k < 5; k++) {
+          const cx = geo.bx[col] + k * geo.dx + dx, y0 = cy + dy;
+          for (let a = 0; a < 12; a++) {
+            const t = a * Math.PI / 6 + 0.2, c = Math.cos(t), s = Math.sin(t);
+            let m = 255;
+            for (let d = -1; d <= 1; d++) m = Math.min(m, can[Math.round(y0 + s * (geo.r + d)) * geo.W + Math.round(cx + c * (geo.r + d))]);
+            sc += can[Math.round(y0 + s * (geo.r + 6)) * geo.W + Math.round(cx + c * (geo.r + 6))] - m;
+          }
+        }
+        if (sc > best) { best = sc; bx = dx; by = dy; }
+      }
+      out.push([bx, by]);
+    }
+    // haluskan antar baris tetangga (median 3) agar satu baris janggal tidak melenceng
+    return out.map((o, q) => {
+      const col = (q / geo.rows) | 0, r = q % geo.rows, ids = [r - 1, r, r + 1].filter(i => i >= 0 && i < geo.rows).map(i => col * geo.rows + i);
+      return [median(ids.map(i => out[i][0])), median(ids.map(i => out[i][1]))];
+    });
+  }
+
   // Baca 50 soal dari kanvas standar. Hasil per soal: 'A'-'E', '-' kosong, '*' ganda, '?' cek ulang.
   function readSheet(can, geo) {
-    const n = geo.rows * 2, D = [], rr = geo.inner * geo.inner;
+    const n = geo.rows * 2, D = [], rr = geo.inner * geo.inner, offs = rowOffsets(can, geo);
     for (let q = 0; q < n; q++) {
-      const col = (q / geo.rows) | 0, cy = geo.by + (q % geo.rows) * geo.dy, row = [];
+      const col = (q / geo.rows) | 0, cy = geo.by + (q % geo.rows) * geo.dy + offs[q][1], row = [];
       for (let k = 0; k < 5; k++) {
-        const cx = geo.bx[col] + k * geo.dx; let s = 0, c = 0; const win = [];
+        const cx = geo.bx[col] + k * geo.dx + offs[q][0]; let s = 0, c = 0; const win = [];
         for (let y = cy - 14; y <= cy + 14; y++) for (let x = cx - 24; x <= cx + 24; x++) {
           const v = can[y * geo.W + x];
           if ((x - cx) ** 2 + (y - cy) ** 2 <= rr) { s += v; c++; }
@@ -259,22 +289,24 @@ nav em{position:absolute;top:2px;right:2px;background:var(--bad);color:#fff;bord
     }
     // baseline per huruf (A..E): tinta huruf cetak berbeda tiap huruf, jadi dikurangi per kolom pilihan
     const baseK = [0, 1, 2, 3, 4].map(k => median(D.map(r => r[k])));
-    const f = D.map(r => r.map((v, k) => v - baseK[k]));
+    const f0 = D.map(r => r.map((v, k) => v - baseK[k]));
+    // acuan lokal: bulatan lain pada baris yang sama berada di cahaya/kertas yang sama, jadi median barisnya dikurangkan
+    const f = f0.map(r => { const m = median(r); return r.map(v => v - m); });
     // derau foto: sebaran bulatan non-tertinggi tiap baris (hampir semuanya kosong)
     const rest = [];
-    f.forEach(r => { const o = r.slice().sort((p, q) => q - p); for (let k = 1; k < 5; k++) rest.push(o[k]); });
+    f.forEach(r => { const o = r.slice().sort((p, q) => q - p); rest.push(o[1], o[3], o[4]); });
     const rmed = median(rest), sigma = 1.4826 * median(rest.map(v => Math.abs(v - rmed)));
     // tingkat "kehitaman tanda" lembar ini (hanya untuk batas bawah)
     const m1s = f.map(r => Math.max(...r)), strong = m1s.filter(v => v > Math.max(0.10, 5 * sigma));
     const level = strong.length >= 2 ? median(strong) : 0.35;
     // satu ambang deteksi: di atas derau, tetapi tetap peka pada pensil tipis
-    const T1 = Math.max(0.06, 4 * sigma, 0.1 * level);
+    const T1 = Math.max(0.05, KS * sigma, 0.1 * level);
     const ans = [];
     f.forEach(r => {
       const idx = [0, 1, 2, 3, 4].sort((a, b) => r[b] - r[a]), m1 = r[idx[0]], m2 = r[idx[1]];
       let a;
       if (m1 < T1) a = '-';                                   // kosong
-      else if (m2 < T1 || m2 < 0.5 * m1) a = 'ABCDE'[idx[0]]; // satu tanda (bekas hapusan yang lebih samar diabaikan)
+      else if (m2 < T1 || m2 < 0.5 * m1) a = m1 >= KC * T1 ? 'ABCDE'[idx[0]] : '?'; // satu tanda (bekas hapusan yang lebih samar diabaikan); terlalu samar = ragu
       else a = m1 >= 2 * T1 ? '*' : '?';                       // dua tanda sebanding: ganda, atau ragu jika terlalu samar
       ans.push(a);
     });
